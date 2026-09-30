@@ -87,7 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="font-medium text-slate-800">{titleFor(pathname)}</span>
           </p>
           <span className="rounded-full bg-teal-50 px-3 py-1.5 text-xs font-semibold text-teal-800">
-            FASE 3
+            FASE 4
           </span>
         </header>
 

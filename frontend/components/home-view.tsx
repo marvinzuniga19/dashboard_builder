@@ -1,9 +1,9 @@
 import { HealthStatus } from "@/components/health-status";
 
 const nextSteps = [
-  { number: "04", title: "Widgets", description: "Indicadores, gráficos y tablas configurables." },
   { number: "05", title: "Dashboard Grid", description: "Arrastrar, redimensionar y guardar layouts." },
   { number: "06", title: "ECharts", description: "Gráficos con la librería ligera de ECharts." },
+  { number: "07", title: "Data Sources", description: "CSV, Excel y SQLite conectados al proyecto." },
 ];
 
 const stack = [
@@ -46,14 +46,14 @@ export function HomeView() {
 
       <section className="surface p-7">
         <p className="text-xs font-semibold uppercase tracking-widest text-teal-700">
-          Tercera etapa completada
+          Cuarta etapa completada
         </p>
-        <h2 className="mt-3 text-xl font-bold">Dashboards: listados, altas y edición</h2>
+        <h2 className="mt-3 text-xl font-bold">Widgets: indicadores, gráficos y tablas</h2>
         <ul className="mt-4 space-y-2 text-sm leading-7 text-slate-500">
-          <li>· Cada dashboard pertenece a su usuario y no se comparte sin permiso.</li>
-          <li>· Listado paginado, ordenado por última modificación.</li>
-          <li>· Un dashboard ajeno responde como si no existiera.</li>
-          <li>· Sesión por cookie httpOnly y contraseñas con bcrypt.</li>
+          <li>· Cada widget pertenece a un dashboard y se aísla igual que su propietario.</li>
+          <li>· Cinco tipos: KPI, barras, líneas, circular y tabla.</li>
+          <li>· Posición y tamaño ya se guardan, listos para el grid-arrastrable.</li>
+          <li>· La configuración describe la consulta; nunca acepta SQL.</li>
         </ul>
       </section>
 
@@ -72,7 +72,7 @@ export function HomeView() {
       </section>
 
       <footer className="text-xs text-slate-400">
-        Dashboard Builder · v0.3.0 · Dashboards
+        Dashboard Builder · v0.4.0 · Widgets
       </footer>
     </main>
   );

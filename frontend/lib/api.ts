@@ -14,10 +14,8 @@ export class ApiError extends Error {
   }
 }
 
-// PUT no se incluye a propósito: el backend no lo declara en `allow_methods`, así
-// que un PUT cruzando orígenes fallaría en el preflight sin aviso.
 type RequestOptions = {
-  method?: "GET" | "POST" | "PATCH" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
   signal?: AbortSignal;
 };
@@ -62,6 +60,10 @@ export function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
 
 export function apiPost<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
   return apiRequest<T>(path, { method: "POST", body, signal });
+}
+
+export function apiPut<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
+  return apiRequest<T>(path, { method: "PUT", body, signal });
 }
 
 export function apiPatch<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {

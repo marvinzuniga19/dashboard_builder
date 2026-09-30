@@ -15,3 +15,69 @@ body { background: var(--background); color: var(--foreground); font-family: Ari
 button, a { -webkit-tap-highlight-color: transparent; }
 .surface { background: var(--surface); border: 1px solid #e4e9ee; border-radius: 18px; }
 code { font-family: ui-monospace, SFMono-Regular, monospace; }
+
+/* ── react-grid-layout ─────────────────────────────────────────────────────── */
+
+/* Placeholder que aparece durante el arrastre */
+.dashboard-grid .react-grid-item.react-grid-placeholder {
+  background: #0d9488;
+  opacity: 0.15;
+  border-radius: 18px;
+  transition-duration: 100ms;
+  z-index: 2;
+}
+
+/* Ítem que se está arrastrando */
+.dashboard-grid .react-grid-item.react-draggable-dragging {
+  opacity: 0.9;
+  z-index: 10;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.18);
+  transition: box-shadow 150ms ease;
+}
+
+/* Ítem que se está redimensionando */
+.dashboard-grid .react-grid-item.resizing {
+  opacity: 0.9;
+  z-index: 10;
+}
+
+/* Handle de redimensionado */
+.dashboard-grid .react-resizable-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  bottom: 6px;
+  right: 6px;
+  cursor: se-resize;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.dashboard-grid .react-grid-item:hover .react-resizable-handle {
+  opacity: 1;
+}
+
+.dashboard-grid .react-resizable-handle::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid #94a3b8;
+  border-bottom: 2px solid #94a3b8;
+  border-radius: 1px;
+}
+
+/* Cursor en el handle de arrastre */
+.widget-drag-handle {
+  cursor: grab;
+}
+.widget-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Transición suave para widgets que no se están arrastrando */
+.dashboard-grid .react-grid-item:not(.react-draggable-dragging):not(.resizing) {
+  transition: transform 200ms ease, opacity 200ms ease;
+}
