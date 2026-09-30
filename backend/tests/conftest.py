@@ -17,6 +17,7 @@ from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 if TYPE_CHECKING:
+    from app.models.dashboard import Dashboard
     from app.models.user import User
 
 test_directory = TemporaryDirectory(prefix="dashboard-builder-tests-")
@@ -52,6 +53,12 @@ def migrated_database() -> Iterator[None]:
 
 @pytest.fixture(autouse=True)
 async def clean_users() -> Iterator[None]:
+    """Vacía la tabla de usuarios.
+
+    Los dashboards de sus clientes caen en cascada por la clave foránea
+    ``ON DELETE CASCADE`` de la base, no por el ORM: por eso este ``delete`` en
+    bloque también los limpia y no hace falta borrar las tablas a mano.
+    """
     from app.core.database import session_factory
     from app.models.user import User
 
@@ -83,6 +90,42 @@ async def user_fixture(session: AsyncSession) -> User:
     from app.services.auth_service import create_user
 
     return await create_user(session, "ana@example.com", "contrasena-segura", "Ana Ruiz")
+
+
+@pytest.fixture(name="other_user")
+async def other_user_fixture(session: AsyncSession) -> User:
+    """Segundo usuario, para comprobar el aislamiento entre cuentas."""
+    from app.services.auth_service import create_user
+
+    return await create_user(session, "bruno@example.com", "contrasena-segura", "Bruno Díaz")
+
+
+@pytest.fixture(name="dashboard")
+async def dashboard_fixture(session: AsyncSession, user: User) -> Dashboard:
+    from app.services.dashboard_service import create_dashboard
+    from app.schemas.dashboard import DashboardCreate
+
+    payload = DashboardCreate(name="Ventas mensuales", description="Resumen comercial")
+    return await create_dashboard(session, user.id, payload)
+
+
+@pytest.fixture(name="other_user_client")
+def other_user_client_fixture(other_user: User) -> Iterator[TestClient]:
+    """Cliente con la sesión de `other_user`.
+
+    Usa su propia instancia porque las cookies viven en el cliente: compartirla
+    con `logged_in_client` haría que la segunda sesión sobrescribiera a la
+    primera, que es justo lo que estos tests necesitan distinguir.
+    """
+    from app.main import app
+
+    with TestClient(app) as test_client:
+        response = test_client.post(
+            "/api/v1/auth/login",
+            json={"email": "bruno@example.com", "password": "contrasena-segura"},
+        )
+        assert response.status_code == 200
+        yield test_client
 
 
 @pytest.fixture(name="logged_in_client")

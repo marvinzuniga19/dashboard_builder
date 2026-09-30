@@ -1,6 +1,6 @@
 # Dashboard Builder
 
-Herramienta de Business Intelligence en desarrollo incremental. **FASE 2: autenticación**, sin Docker. Los usuarios se dan de alta con un comando local, la sesión viaja en una cookie httpOnly y la pantalla de inicio solo es visible con una sesión válida. Dashboards, widgets y gráficos aún no están implementados.
+Herramienta de Business Intelligence en desarrollo incremental. **FASE 3: dashboards**, sin Docker. Cada dashboard pertenece a un usuario y se gestiona con listados paginados, alta, renombrado y borrado. Los usuarios se dan de alta con un comando local y la sesión viaja en una cookie httpOnly. Los widgets y los gráficos aún no están implementados.
 
 ## Requisitos
 
@@ -70,18 +70,41 @@ npm ci
 npm run dev
 ```
 
-Abre **http://localhost:3000/login**. Inicia sesión con el usuario creado y entrarás en el inicio protegido.
+Abre **http://localhost:3000/login**. Inicia sesión con el usuario creado; la raíz redirige a `/dashboards`.
 
 Usa siempre `localhost`, no `127.0.0.1`: la cookie es same-site y el origen CORS configurado es `http://localhost:3000`.
+
+## Rutas del frontend
+
+| Ruta | Contenido |
+| --- | --- |
+| `/` | Redirige a `/dashboards` |
+| `/dashboards` | Listado paginado, alta y borrado |
+| `/dashboards/[id]` | Detalle, renombrado y lienzo vacío |
+| `/inicio` | Estado de la sesión y de la conexión |
+| `/login` | Inicio de sesión |
+
+Las páginas salvo `/login` exigen sesión; sin ella redirigen a `/login`.
 
 ## Endpoints
 
 ```text
 GET  /api/v1/health
-POST /api/v1/auth/login
-POST /api/v1/auth/logout
-GET  /api/v1/auth/me      (requiere cookie de sesión)
+
+POST   /api/v1/auth/login
+POST   /api/v1/auth/logout
+GET    /api/v1/auth/me          (requiere cookie de sesión)
+
+GET    /api/v1/dashboards       ?limit=20&offset=0
+POST   /api/v1/dashboards
+GET    /api/v1/dashboards/{id}
+PATCH  /api/v1/dashboards/{id}
+DELETE /api/v1/dashboards/{id}
 ```
+
+El listado devuelve `{"items": [...], "total": N, "limit": L, "offset": O}`. `limit` va de 1 a 100 y `offset` de 0 en adelante; fuera de rango responde 422. El orden es por última modificación.
+
+Un dashboard que no existe o que pertenece a otra cuenta responde **404** `DASHBOARD_NOT_FOUND`, nunca 403: un 403 confirmaría que el identificador existe.
 
 ## Configuración
 
@@ -115,6 +138,8 @@ GET  /api/v1/auth/me      (requiere cookie de sesión)
 - Login responde siempre con el mismo código y mensaje, exista o no la cuenta, e iguala el tiempo de verificación para no permitir enumerar usuarios.
 - Un usuario desactivado responde igual que una contraseña incorrecta.
 - `/api/v1/auth/me` es la referencia de endpoint protegido.
+- Cada consulta de dashboards se filtra por el usuario de la sesión. El propietario lo impone el servidor: un `user_id` en el cuerpo de la petición se rechaza con 422.
+- Los campos desconocidos en un payload se rechazan con 422 en lugar de ignorarse en silencio.
 
 ## Validaciones
 
@@ -145,17 +170,18 @@ npm start
 
 ## Estructura
 
-- `backend/app/api/routes/`: endpoints HTTP (`health.py`, `auth.py`).
+- `backend/app/api/routes/`: endpoints HTTP (`health.py`, `auth.py`, `dashboards.py`).
 - `backend/app/api/deps.py`: dependencias compartidas, incluida `get_current_user`.
 - `backend/app/core/`: configuración, conexión SQLAlchemy async y `security.py` (bcrypt + JWT).
 - `backend/app/models/`, `schemas/`, `repositories/`, `services/`: capas por responsabilidad.
 - `backend/app/cli/create_user.py`: alta local de usuarios.
 - `backend/alembic/`: migraciones versionadas.
-- `backend/tests/`: pruebas de infraestructura y de autenticación.
-- `frontend/app/`: App Router, `login/`, `providers.tsx` con SWR.
-- `frontend/components/`: `home-view.tsx`, `health-status.tsx`.
-- `frontend/hooks/useAuth.ts`: sesión actual, inicio y cierre de sesión.
-- `frontend/lib/`: `api.ts` (comunicaciones HTTP) y `fetcher.ts` (SWR).
+- `backend/tests/`: pruebas de infraestructura, autenticación y dashboards.
+- `frontend/app/`: App Router, `dashboards/`, `inicio/`, `login/`, `providers.tsx` con SWR.
+- `frontend/components/`: `app-shell.tsx`, `require-auth.tsx`, `home-view.tsx`, `health-status.tsx`.
+- `frontend/hooks/`: `useAuth.ts` (sesión) y `useDashboards.ts` (listado y mutaciones).
+- `frontend/lib/`: `api.ts` (comunicaciones HTTP), `fetcher.ts` (SWR) y `dashboard-pagination.ts` (estado de la lista paginada).
+- `validaciones/`: informe de verificación de cada fase.
 - `AGENTS.md`: reglas de arquitectura, alcance y roadmap.
 
 ## Problemas habituales
@@ -166,16 +192,17 @@ npm start
 - **No conecta con la API:** verifica uvicorn en el puerto 8000 y la variable del frontend.
 - **No existe la base:** ejecuta `alembic upgrade head` antes de iniciar el backend.
 - **Falta el usuario de prueba:** no hay registro público; usa `python -m app.cli.create_user`.
+- **«Dashboard no encontrado» con una sesión válida:** ese dashboard no es tuyo. Comprueba con qué cuenta iniciaste sesión.
 
 ## Próxima fase
 
-**FASE 3 — Dashboards**: modelo Dashboard, migración, schemas, repository, service, API CRUD y listado, creación, edición y eliminación en el frontend.
+**FASE 4 — Widgets**: modelo Widget con migración, tipos `KPI`, `BAR_CHART`, `LINE_CHART`, `PIE_CHART` y `TABLE`, endpoints bajo `/api/v1/dashboards/{id}/widgets` y `/api/v1/widgets/{id}`, y configuración básica.
 
 Commit sugerido (no realizado):
 
 ```bash
 git add .
-git commit -m "feat(auth): add users, JWT session cookies and login flow"
+git commit -m "feat(dashboard): add dashboards CRUD with pagination"
 ```
 
-No se Versionó `.env`, `.venv`, `node_modules` ni la base de datos de ejecución.
+No se versionó `.env`, `.venv`, `node_modules` ni la base de datos de ejecución.
