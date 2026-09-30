@@ -1,6 +1,23 @@
 # Dashboard Builder
 
-Herramienta de Business Intelligence en desarrollo incremental. **FASE 5: grid interactivo**, sin Docker. Los widgets se arrastran y redimensionan en un lienzo de 12 columnas impulsado por `react-grid-layout`; la posición se persiste al soltar. Las fases anteriores cubren autenticación, dashboards y el modelo completo de widgets con aislamiento por usuario.
+Herramienta de Business Intelligence en desarrollo incremental. **FASE 5 implementada: grid interactivo**, sin Docker. La validación del flujo interactivo en navegador está pendiente. Los widgets se arrastran y redimensionan en un lienzo de 12 columnas impulsado por `react-grid-layout`; la posición se persiste al soltar. Las fases anteriores cubren autenticación, dashboards y el modelo completo de widgets con aislamiento por usuario.
+
+## Estado del proyecto
+
+| Fase | Estado |
+| --- | --- |
+| 1 — Bootstrap local | Implementada |
+| 2 — Autenticación | Implementada |
+| 3 — Dashboards | Implementada |
+| 4 — Widgets | Implementada |
+| 5 — Dashboard Grid | Implementada; pendiente de validación interactiva en navegador |
+| 6 — ECharts | Pendiente; siguiente fase |
+| 7 — Data Sources | Pendiente |
+| 8 — Query Engine | Pendiente |
+| 9 — Widget Builder | Pendiente |
+| 10 — Dashboard profesional | Pendiente |
+
+Los widgets todavía muestran contenido provisional: los KPI presentan `--` y los gráficos y tablas tienen espacios reservados. Los gráficos ECharts se integrarán en la FASE 6; las fuentes de datos y las consultas para obtener indicadores reales corresponden a las FASES 7 y 8.
 
 ## Requisitos
 
@@ -11,7 +28,7 @@ Herramienta de Business Intelligence en desarrollo incremental. **FASE 5: grid i
 ## Abrir en VS Code
 
 ```bash
-cd dashboard-builder
+cd dashboard_builder
 code .
 ```
 
@@ -84,7 +101,7 @@ Usa siempre `localhost`, no `127.0.0.1`: la cookie es same-site y el origen CORS
 | `/inicio` | Estado de la sesión y de la conexión |
 | `/login` | Inicio de sesión |
 
-Las páginas salvo `/login` exigen sesión; sin ellas redirigen a `/login`.
+Las páginas salvo `/login` exigen sesión; sin sesión redirigen a `/login`.
 
 ## Endpoints
 
@@ -136,7 +153,7 @@ El cuerpo acepta `type`, `title` (opcional), `configuration` y `layout`:
 ```
 
 - `configuration` solo admite esas cuatro claves y una `aggregation` de la lista cerrada `sum`, `avg`, `count`, `min`, `max`, `distinct_count`. **No se acepta SQL ni texto libre.** La FASE 9 lo amplía al elegir dataset, dimensión, métrica y agregación desde la interfaz.
-- `layout` exige las cuatro cifras y se guarda como columnas, para que la FASE 5 pueda parchearlo al terminar cada arrastre.
+- `layout` exige las cuatro cifras y se guarda en columnas individuales (`x`, `y`, `w`, `h`). El grid actualiza las posiciones y tamaños en lote al finalizar el arrastre o el redimensionado, sin enviar peticiones durante cada movimiento.
 - Si no se envía `layout`, el widget se coloca debajo del más bajo del dashboard, de modo que dos widgets seguidos no nazcan superpuestos. Si no se envía `title`, se usa el nombre del tipo.
 - Un `PATCH` con `{}` responde 400 `WIDGET_EMPTY_PATCH`.
 - En un `PATCH`, omitir `configuration` o `layout` los deja intactos, pero enviarlos a `null` es un 422: para vaciar la configuración se manda `{}`.
@@ -204,6 +221,18 @@ npm start
 
 `backend/requirements-lock.txt` fija las versiones exactas del entorno validado, incluidas las de pruebas. `requirements.txt` contiene sólo dependencias directas de ejecución.
 
+### Validación registrada de la FASE 5
+
+El [informe de la FASE 5](validaciones/VALIDACION-FASE5.md) registra 174 pruebas de backend aprobadas, `alembic check` sin cambios pendientes y las comprobaciones de frontend `lint`, `typecheck` y `build` aprobadas. Estos resultados corresponden al informe existente; no constituyen una nueva ejecución de pruebas por esta actualización del README.
+
+**Pendiente:** el informe indica que no se verificó el flujo interactivo en un navegador. Para cerrar la validación de la fase:
+
+1. Iniciar sesión, crear un dashboard y agregar varios widgets.
+2. Arrastrar un widget mediante su control de arrastre y comprobar que la posición se guarda al soltar.
+3. Redimensionar un widget y comprobar que el tamaño se guarda al terminar.
+4. Recargar la página y confirmar que se restauran las posiciones y tamaños.
+5. Provocar un fallo de guardado, por ejemplo deteniendo temporalmente la API, y comprobar el mensaje de error y la coherencia del lienzo al restablecer la conexión.
+
 ## Estructura
 
 - `backend/app/api/routes/`: endpoints HTTP (`health.py`, `auth.py`, `dashboards.py`, `widgets.py`).
@@ -215,6 +244,8 @@ npm start
 - `backend/tests/`: pruebas de infraestructura, autenticación, dashboards y widgets.
 - `frontend/app/`: App Router, `dashboards/`, `inicio/`, `login/`, `providers.tsx` con SWR.
 - `frontend/components/`: `app-shell.tsx`, `require-auth.tsx`, `home-view.tsx`, `health-status.tsx`.
+- `frontend/components/dashboard/dashboard-grid.tsx`: lienzo de 12 columnas con arrastre, redimensionado y persistencia.
+- `frontend/components/widgets/widget-card.tsx`: tarjeta de widget con control de arrastre y contenido provisional.
 - `frontend/hooks/`: `useAuth.ts` (sesión), `useDashboards.ts` y `useWidgets.ts` (listados y mutaciones).
 - `frontend/lib/`: `api.ts` (comunicaciones HTTP), `fetcher.ts` (SWR) y `dashboard-pagination.ts` (estado de la lista paginada).
 - `validaciones/`: informe de verificación de cada fase.
@@ -232,13 +263,10 @@ npm start
 
 ## Próxima fase
 
-**FASE 5 — Dashboard Grid**: integrar `react-grid-layout` con arrastre, redimensionado y persistencia del layout al terminar cada operación.
+**FASE 6 — ECharts**: integrar `echarts/core`, registrar solo los componentes utilizados y crear gráficos de barras, líneas y circular mediante un `ChartRenderer`. Adaptar las visualizaciones al tamaño del widget.
 
-Commit sugerido (no realizado):
+La integración de gráficos no implica disponer todavía de datos reales: las fuentes de datos y el motor de consultas se implementarán en las FASES 7 y 8.
 
-```bash
-git add .
-git commit -m "feat(widget): add widgets CRUD with layout and configuration"
-```
+Antes de declarar completamente validada la FASE 5, completar las comprobaciones en navegador descritas arriba.
 
 No se versionó `.env`, `.venv`, `node_modules` ni la base de datos de ejecución.
