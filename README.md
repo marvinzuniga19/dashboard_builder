@@ -1,6 +1,6 @@
 # Dashboard Builder
 
-Herramienta de Business Intelligence en desarrollo incremental. **FASE 5 implementada: grid interactivo**, sin Docker. La validación del flujo interactivo en navegador está pendiente. Los widgets se arrastran y redimensionan en un lienzo de 12 columnas impulsado por `react-grid-layout`; la posición se persiste al soltar. Las fases anteriores cubren autenticación, dashboards y el modelo completo de widgets con aislamiento por usuario.
+Herramienta de Business Intelligence en desarrollo incremental. **FASE 6 implementada: gráficos ECharts**, sin Docker. Los gráficos de barras, líneas y circular se muestran con datos de demostración identificados. La prueba automatizada de navegador usa una API simulada; la validación integral con la API real sigue pendiente. Los widgets se arrastran y redimensionan en un lienzo de 12 columnas impulsado por `react-grid-layout`; la posición se persiste al soltar. Las fases anteriores cubren autenticación, dashboards y el modelo completo de widgets con aislamiento por usuario.
 
 ## Estado del proyecto
 
@@ -11,13 +11,13 @@ Herramienta de Business Intelligence en desarrollo incremental. **FASE 5 impleme
 | 3 — Dashboards | Implementada |
 | 4 — Widgets | Implementada |
 | 5 — Dashboard Grid | Implementada; pendiente de validación interactiva en navegador |
-| 6 — ECharts | Pendiente; siguiente fase |
-| 7 — Data Sources | Pendiente |
+| 6 — ECharts | Implementada con datos de demostración |
+| 7 — Data Sources | Pendiente; siguiente fase |
 | 8 — Query Engine | Pendiente |
 | 9 — Widget Builder | Pendiente |
 | 10 — Dashboard profesional | Pendiente |
 
-Los widgets todavía muestran contenido provisional: los KPI presentan `--` y los gráficos y tablas tienen espacios reservados. Los gráficos ECharts se integrarán en la FASE 6; las fuentes de datos y las consultas para obtener indicadores reales corresponden a las FASES 7 y 8.
+Los gráficos ECharts muestran ejemplos fijos con la etiqueta **Datos de demostración · Sin fuente conectada**. No representan la configuración ni métricas reales del usuario. Los KPI presentan `--` y las tablas conservan su espacio reservado. Las fuentes de datos y las consultas para obtener indicadores reales corresponden a las FASES 7 y 8.
 
 ## Requisitos
 
@@ -159,6 +159,18 @@ El cuerpo acepta `type`, `title` (opcional), `configuration` y `layout`:
 - En un `PATCH`, omitir `configuration` o `layout` los deja intactos, pero enviarlos a `null` es un 422: para vaciar la configuración se manda `{}`.
 - `type` y `dashboard_id` no se pueden modificar: cambiarlos invalidaría la configuración guardada.
 
+## Gráficos — FASE 6
+
+- `ChartRenderer` selecciona barras, líneas o circular según el tipo del widget.
+- Se importa `echarts/core` y se registran únicamente `BarChart`, `LineChart`, `PieChart`, `GridComponent`, `TooltipComponent`, `LegendComponent` y `CanvasRenderer`.
+- Los gráficos se cargan de forma diferida solo en el cliente, sin inicializar canvas durante SSR.
+- `ResizeObserver` ajusta el canvas cuando cambia el contenedor, incluido el redimensionado del grid. Al desmontarse se desconecta el observador y se libera la instancia con `dispose()`.
+- `ChartData` define categorías y series numéricas ya preparadas para visualizar; no añade consultas ni opciones ECharts arbitrarias a la configuración persistida.
+- Se contemplan carga, datos vacíos, valores incompatibles y fallos de renderizado. El texto accesible incluye los valores del gráfico.
+- No se requieren migraciones ni endpoints nuevos.
+
+Para probar: abre un dashboard, añade un widget de barras, uno de líneas y uno circular; comprueba sus etiquetas de demostración, leyendas y tooltips. Redimensiona y arrastra los widgets, y recarga para comprobar el layout.
+
 ## Configuración
 
 `.env` (raíz):
@@ -233,6 +245,20 @@ El [informe de la FASE 5](validaciones/VALIDACION-FASE5.md) registra 174 pruebas
 4. Recargar la página y confirmar que se restauran las posiciones y tamaños.
 5. Provocar un fallo de guardado, por ejemplo deteniendo temporalmente la API, y comprobar el mensaje de error y la coherencia del lienzo al restablecer la conexión.
 
+### Validación de la FASE 6
+
+Consulta el [informe de la FASE 6](validaciones/VALIDACION-FASE6.md) para los resultados y límites de la verificación.
+
+Pruebas automatizadas del frontend (no usan la base de datos ni requieren iniciar FastAPI):
+
+```bash
+cd frontend
+npx playwright install chromium
+npm run test:e2e
+```
+
+Playwright inicia Next.js en `http://localhost:3100`. La prueba de navegador simula las respuestas HTTP de la API para comprobar los gráficos, el redimensionado, el arrastre, la restauración del layout y la eliminación. No verifica persistencia real en SQLite ni el flujo completo de autenticación. Si ya tienes un Chromium compatible, puedes indicar su ejecutable mediante `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
+
 ## Estructura
 
 - `backend/app/api/routes/`: endpoints HTTP (`health.py`, `auth.py`, `dashboards.py`, `widgets.py`).
@@ -245,7 +271,10 @@ El [informe de la FASE 5](validaciones/VALIDACION-FASE5.md) registra 174 pruebas
 - `frontend/app/`: App Router, `dashboards/`, `inicio/`, `login/`, `providers.tsx` con SWR.
 - `frontend/components/`: `app-shell.tsx`, `require-auth.tsx`, `home-view.tsx`, `health-status.tsx`.
 - `frontend/components/dashboard/dashboard-grid.tsx`: lienzo de 12 columnas con arrastre, redimensionado y persistencia.
-- `frontend/components/widgets/widget-card.tsx`: tarjeta de widget con control de arrastre y contenido provisional.
+- `frontend/components/widgets/widget-card.tsx`: tarjeta de widget con control de arrastre, gráficos de demostración y estados provisionales de KPI/tabla.
+- `frontend/components/charts/`: `ChartRenderer`, barras, líneas, circular y ciclo de vida compartido de ECharts.
+- `frontend/lib/echarts.ts`, `frontend/lib/chart-demo-data.ts` y `frontend/types/charts.ts`: registro modular, ejemplos y contrato de datos.
+- `frontend/tests/charts.spec.ts`: validación de datos y pruebas del dashboard en Chromium.
 - `frontend/hooks/`: `useAuth.ts` (sesión), `useDashboards.ts` y `useWidgets.ts` (listados y mutaciones).
 - `frontend/lib/`: `api.ts` (comunicaciones HTTP), `fetcher.ts` (SWR) y `dashboard-pagination.ts` (estado de la lista paginada).
 - `validaciones/`: informe de verificación de cada fase.
@@ -263,10 +292,10 @@ El [informe de la FASE 5](validaciones/VALIDACION-FASE5.md) registra 174 pruebas
 
 ## Próxima fase
 
-**FASE 6 — ECharts**: integrar `echarts/core`, registrar solo los componentes utilizados y crear gráficos de barras, líneas y circular mediante un `ChartRenderer`. Adaptar las visualizaciones al tamaño del widget.
+**FASE 7 — Data Sources**: crear la abstracción de fuentes de datos y conectar únicamente las fuentes previstas para esa fase. Preparar la arquitectura para CSV, Excel, SQLite y futuras conexiones.
 
-La integración de gráficos no implica disponer todavía de datos reales: las fuentes de datos y el motor de consultas se implementarán en las FASES 7 y 8.
+La obtención de datos agregados para los widgets se completará con el motor de consultas seguro de la FASE 8. Hasta entonces, los gráficos mantienen ejemplos identificados.
 
-Antes de declarar completamente validada la FASE 5, completar las comprobaciones en navegador descritas arriba.
+La validación integral de la FASE 5 con la API real, incluido el comportamiento ante errores de guardado, sigue pendiente; la FASE 6 incorpora pruebas de navegador con una API simulada.
 
 No se versionó `.env`, `.venv`, `node_modules` ni la base de datos de ejecución.

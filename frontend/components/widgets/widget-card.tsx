@@ -1,5 +1,9 @@
 "use client";
 
+import { ChartRenderer } from "@/components/charts/ChartRenderer";
+import { CHART_DEMO_DATA } from "@/lib/chart-demo-data";
+import { isChartType } from "@/types/charts";
+
 import { WIDGET_TYPE_LABELS, type Widget } from "@/types/api";
 
 type WidgetCardProps = {
@@ -73,32 +77,47 @@ export function WidgetCard({ widget, onRemove, isRemoving = false }: WidgetCardP
       </header>
 
       {/* Contenido principal del widget */}
-      <div className="flex min-h-0 flex-1 flex-col p-4">
+      <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4">
         <h3 className="truncate font-semibold text-slate-900" title={widget.title}>
           {widget.title}
         </h3>
 
-        <div className="mt-2 flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 p-4 text-center">
-          {widget.type === "KPI" ? (
-            <div className="space-y-1">
-              <span className="text-3xl font-extrabold text-slate-800 tracking-tight">--</span>
-              <p className="text-xs text-slate-500">
-                {widget.configuration.metric ? `Métrica: ${widget.configuration.metric}` : "Sin datos asignados"}
-              </p>
+        {isChartType(widget.type) ? (
+          <div className="mt-2 flex min-h-[166px] flex-1 flex-col">
+            <p className="mb-1 text-[11px] font-semibold text-amber-800">
+              Datos de demostración · Sin fuente conectada
+            </p>
+            <div className="min-h-[140px] flex-1">
+              <ChartRenderer
+                type={widget.type}
+                data={CHART_DEMO_DATA[widget.type]}
+                title={`${widget.title} (datos de demostración)`}
+              />
             </div>
-          ) : (
-            <div className="space-y-1 text-slate-400">
-              <p className="text-xs font-medium text-slate-600">
-                {widget.configuration.metric
-                  ? `Métrica: ${widget.configuration.metric}`
-                  : "Visualización en desarrollo"}
-              </p>
-              <p className="text-[11px] text-slate-400">
-                {widget.type === "TABLE" ? "Estructura de tabla" : "Gráfico ECharts en FASE 6"}
-              </p>
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="mt-2 flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 p-4 text-center">
+            {widget.type === "KPI" ? (
+              <div className="space-y-1">
+                <span className="text-3xl font-extrabold text-slate-800 tracking-tight">--</span>
+                <p className="text-xs text-slate-500">
+                  {widget.configuration.metric ? `Métrica: ${widget.configuration.metric}` : "Sin datos asignados"}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1 text-slate-400">
+                <p className="text-xs font-medium text-slate-600">
+                  {widget.configuration.metric
+                    ? `Métrica: ${widget.configuration.metric}`
+                    : "Visualización en desarrollo"}
+                </p>
+                <p className="text-[11px] text-slate-400">
+                  Estructura de tabla
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Pie con coordenadas */}

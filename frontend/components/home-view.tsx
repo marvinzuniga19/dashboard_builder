@@ -1,9 +1,9 @@
 import { HealthStatus } from "@/components/health-status";
 
 const nextSteps = [
-  { number: "05", title: "Dashboard Grid", description: "Arrastrar, redimensionar y guardar layouts." },
-  { number: "06", title: "ECharts", description: "Gráficos con la librería ligera de ECharts." },
   { number: "07", title: "Data Sources", description: "CSV, Excel y SQLite conectados al proyecto." },
+  { number: "08", title: "Query Engine", description: "Consultas seguras y datos agregados para los widgets." },
+  { number: "09", title: "Widget Builder", description: "Selección visual de campos, métricas y filtros." },
 ];
 
 const stack = [
@@ -46,14 +46,14 @@ export function HomeView() {
 
       <section className="surface p-7">
         <p className="text-xs font-semibold uppercase tracking-widest text-teal-700">
-          Cuarta etapa completada
+          Sexta etapa implementada
         </p>
-        <h2 className="mt-3 text-xl font-bold">Widgets: indicadores, gráficos y tablas</h2>
+        <h2 className="mt-3 text-xl font-bold">Gráficos ECharts en el dashboard</h2>
         <ul className="mt-4 space-y-2 text-sm leading-7 text-slate-500">
           <li>· Cada widget pertenece a un dashboard y se aísla igual que su propietario.</li>
           <li>· Cinco tipos: KPI, barras, líneas, circular y tabla.</li>
-          <li>· Posición y tamaño ya se guardan, listos para el grid-arrastrable.</li>
-          <li>· La configuración describe la consulta; nunca acepta SQL.</li>
+          <li>· El grid permite arrastrar, redimensionar y guardar la posición.</li>
+          <li>· Barras, líneas y circular muestran datos de demostración identificados.</li>
         </ul>
       </section>
 
@@ -72,7 +72,7 @@ export function HomeView() {
       </section>
 
       <footer className="text-xs text-slate-400">
-        Dashboard Builder · v0.4.0 · Widgets
+        Dashboard Builder · FASE 6 · ECharts
       </footer>
     </main>
   );

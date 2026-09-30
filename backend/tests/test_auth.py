@@ -1,5 +1,7 @@
 """Pruebas de la FASE 2: hashing, tokens, cookie de sesión y protección de endpoints."""
 
+from __future__ import annotations
+
 import datetime as dt
 from typing import TYPE_CHECKING
 

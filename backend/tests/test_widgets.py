@@ -6,6 +6,8 @@ ajeno debe ser indistinguible de uno inexistente y el listado nunca debe incluir
 widgets de otra cuenta.
 """
 
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import pytest

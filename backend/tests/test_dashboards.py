@@ -4,6 +4,8 @@ La prioridad es la autorización: un dashboard ajeno debe ser indistinguible de 
 inexistente, y el listado nunca debe incluir datos de otra cuenta.
 """
 
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import pytest

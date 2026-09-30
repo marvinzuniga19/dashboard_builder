@@ -103,26 +103,12 @@ export function DashboardGrid({
     setLocalLayout(newLayout);
   }, []);
 
-  /** Al soltar el drag comparamos con el estado de los widgets y persistimos si cambió. */
-  const handleDragStop = useCallback(() => {
-    setLocalLayout((current) => {
-      const canonical = widgetsToLayout(widgets);
-      if (!layoutsEqual(current, canonical)) {
-        onLayoutChange(layoutToItems(current));
-      }
-      return current;
-    });
-  }, [widgets, onLayoutChange]);
-
-  /** Al soltar el resize ídem. */
-  const handleResizeStop = useCallback(() => {
-    setLocalLayout((current) => {
-      const canonical = widgetsToLayout(widgets);
-      if (!layoutsEqual(current, canonical)) {
-        onLayoutChange(layoutToItems(current));
-      }
-      return current;
-    });
+  /** Persiste el layout final que entrega RGL, sin efectos dentro de un updater de React. */
+  const handleInteractionStop = useCallback((newLayout: RGLLayout) => {
+    setLocalLayout(newLayout);
+    if (!layoutsEqual(newLayout, widgetsToLayout(widgets))) {
+      onLayoutChange(layoutToItems(newLayout));
+    }
   }, [widgets, onLayoutChange]);
 
   if (widgets.length === 0) {
@@ -143,8 +129,8 @@ export function DashboardGrid({
           compactor={verticalCompactor}
           autoSize
           onLayoutChange={handleLayoutChange}
-          onDragStop={handleDragStop}
-          onResizeStop={handleResizeStop}
+          onDragStop={handleInteractionStop}
+          onResizeStop={handleInteractionStop}
           className="dashboard-grid"
         >
           {widgets.map((widget) => (

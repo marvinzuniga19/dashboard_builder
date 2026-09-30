@@ -5,6 +5,8 @@ de la aplicación crean el engine en el momento de importarse y ``get_settings``
 cachea el resultado, por lo que un import prematuro apuntaría al ``.env`` real.
 """
 
+from __future__ import annotations
+
 import os
 from collections.abc import Iterator
 from pathlib import Path
