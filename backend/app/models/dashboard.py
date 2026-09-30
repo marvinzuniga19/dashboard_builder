@@ -1,4 +1,4 @@
-"""Dashboard de un usuario. Los widgets se añaden en la FASE 4.
+"""Dashboard de un usuario. Sus widgets viven en :mod:`app.models.widget`.
 
 Las longitudes de las columnas viven aquí porque son el límite real del
 almacenamiento; ``app/schemas/dashboard.py`` las reutiliza para validar la entrada
@@ -7,7 +7,8 @@ y evitar que ambas se desincronicen.
 No se declaran relaciones ORM: la pertenencia al usuario se resuelve filtrando
 por ``user_id`` y el borrado en cascada lo aplica la base de datos con
 ``ondelete="CASCADE"``, de modo que no depende del modelo para no dejar filas
-huérfanas.
+huérfanas. Ese mismo mecanismo encadena con los widgets, que cuelgan de este
+dashboard.
 """
 
 import datetime as dt

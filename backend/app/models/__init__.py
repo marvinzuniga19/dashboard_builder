@@ -2,5 +2,6 @@
 
 from app.models.dashboard import Dashboard
 from app.models.user import User
+from app.models.widget import Widget, WidgetType
 
-__all__ = ["Dashboard", "User"]
+__all__ = ["Dashboard", "User", "Widget", "WidgetType"]

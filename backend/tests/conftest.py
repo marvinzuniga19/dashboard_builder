@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 if TYPE_CHECKING:
     from app.models.dashboard import Dashboard
     from app.models.user import User
+    from app.models.widget import Widget, WidgetType
 
 test_directory = TemporaryDirectory(prefix="dashboard-builder-tests-")
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{test_directory.name}/test.db"
@@ -107,6 +108,16 @@ async def dashboard_fixture(session: AsyncSession, user: User) -> Dashboard:
 
     payload = DashboardCreate(name="Ventas mensuales", description="Resumen comercial")
     return await create_dashboard(session, user.id, payload)
+
+
+@pytest.fixture(name="widget")
+async def widget_fixture(session: AsyncSession, dashboard: Dashboard) -> Widget:
+    from app.models.widget import WidgetType
+    from app.schemas.widget import WidgetCreate
+    from app.services.widget_service import create_widget
+
+    payload = WidgetCreate(type=WidgetType.KPI, title="Ventas del mes")
+    return await create_widget(session, dashboard.id, dashboard.user_id, payload)
 
 
 @pytest.fixture(name="other_user_client")
