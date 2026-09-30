@@ -99,15 +99,14 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting || email === "" || password === ""}
-          className="w-full rounded-xl bg-teal-800 px-4 py-3 text-sm font-semibold text-white transition hover:bg-teal-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="ui-button ui-button-primary w-full"
         >
           {isSubmitting ? "Comprobando…" : "Entrar"}
         </button>
       </form>
 
       <p className="mt-6 text-xs leading-5 text-slate-500">
-        ¿Aún no tienes cuenta? Créala en local con{" "}
-        <code className="rounded bg-slate-100 px-1.5 py-0.5">python -m app.cli.create_user</code>.
+        ¿Necesitas acceso? Solicita al administrador que cree tu cuenta.
       </p>
     </AuthFrame>
   );
@@ -123,11 +122,11 @@ function AuthFrame({
   children?: React.ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-12">
+    <main className="flex min-h-screen items-center justify-center bg-background px-6 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-800 text-lg font-bold text-white">
-            D
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-800 text-sm font-semibold text-white">
+            DB
           </span>
           <div>
             <p className="font-bold tracking-tight">Dashboard Builder</p>

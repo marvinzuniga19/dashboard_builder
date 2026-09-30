@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUpRight, LayoutDashboard, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -45,24 +46,24 @@ function DashboardsContent() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl space-y-7 px-6 py-10 lg:px-10 lg:py-12">
+    <main className="ui-page space-y-7">
       <section className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-700">
+          <p className="ui-eyebrow">
             Tu espacio de trabajo
           </p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Dashboards</h1>
-          <p className="mt-3 max-w-2xl text-base leading-7 text-slate-500">
-            Cada dashboard es tuyo. Los widgets que lo llenen llegarán en una fase posterior.
+          <h1 className="ui-heading">Dashboards</h1>
+          <p className="ui-subtitle max-w-xl">
+            Tus espacios de análisis. Organiza gráficos e indicadores y encuentra lo que necesitas de un vistazo.
           </p>
         </div>
         <button
           type="button"
           onClick={() => setIsCreating((value) => !value)}
           aria-expanded={isCreating}
-          className="rounded-xl bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-800"
+          className="ui-button ui-button-primary"
         >
-          {isCreating ? "Cancelar" : "Nuevo dashboard"}
+          <Plus size={16} aria-hidden="true" />{isCreating ? "Cancelar" : "Nuevo dashboard"}
         </button>
       </section>
 
@@ -81,7 +82,7 @@ function DashboardsContent() {
               onChange={(event) => setName(event.target.value)}
               placeholder="Ventas mensuales"
               aria-describedby={actions.error ? "dashboard-create-error" : undefined}
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-700 focus:ring-4 focus:ring-teal-100"
+              className="ui-input"
             />
           </div>
           <div className="space-y-2">
@@ -99,7 +100,7 @@ function DashboardsContent() {
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               placeholder="Qué contiene este dashboard."
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-700 focus:ring-4 focus:ring-teal-100"
+              className="ui-input"
             />
           </div>
           {actions.error ? (
@@ -114,7 +115,7 @@ function DashboardsContent() {
           <button
             type="submit"
             disabled={actions.isSubmitting || name.trim() === ""}
-            className="rounded-xl bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-900 disabled:cursor-not-allowed disabled:opacity-50"
+            className="ui-button ui-button-primary"
           >
             {actions.isSubmitting ? "Creando…" : "Crear dashboard"}
           </button>
@@ -163,16 +164,17 @@ function DashboardsContent() {
 
       {list.state === "success" ? (
         <section aria-label="Lista de dashboards">
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {list.dashboards.map((dashboard) => (
-              <li key={dashboard.id} className="surface flex flex-col p-6">
+              <li key={dashboard.id} className="surface flex min-w-0 flex-col p-5 transition-shadow hover:shadow-md">
+                <div className="mb-5 flex items-center justify-between text-slate-400"><span className="rounded-lg bg-teal-50 p-2 text-teal-800"><LayoutDashboard size={18} aria-hidden="true" /></span><ArrowUpRight size={17} aria-hidden="true" /></div>
                 <Link
                   href={`/dashboards/${dashboard.id}`}
-                  className="font-semibold hover:text-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-800"
+                  className="break-words text-base font-semibold hover:text-teal-800"
                 >
                   {dashboard.name}
                 </Link>
-                <p className="mt-2 flex-1 text-sm leading-6 text-slate-500">
+                <p className="mt-2 flex-1 break-words text-sm leading-6 text-slate-500">
                   {dashboard.description || (
                     <span className="text-slate-400">Sin descripción</span>
                   )}
@@ -202,7 +204,7 @@ function DashboardsContent() {
                 type="button"
                 onClick={() => list.goToPage(list.page - 1)}
                 disabled={!list.hasPrevious}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="ui-button"
               >
                 Anterior
               </button>
@@ -213,7 +215,7 @@ function DashboardsContent() {
                 type="button"
                 onClick={() => list.goToPage(list.page + 1)}
                 disabled={!list.hasNext}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="ui-button"
               >
                 Siguiente
               </button>

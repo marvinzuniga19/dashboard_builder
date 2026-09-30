@@ -1,83 +1,109 @@
 @import "tailwindcss";
 
-:root {
-  --background: #f5f7fa;
-  --foreground: #182638;
-  --surface: #ffffff;
+:root { --background:#f4f6f9; --foreground:#172435; --surface:#fff; --border:#e2e8ef; --accent:#147d78; }
+@theme inline { --color-background:var(--background); --color-foreground:var(--foreground); }
+body { background:var(--background); color:var(--foreground); font-family:Inter,"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif; -webkit-font-smoothing:antialiased; }
+button,a { -webkit-tap-highlight-color:transparent; }
+button:not(:disabled),summary { cursor:pointer; }
+button:disabled { cursor:not-allowed; opacity:.5; }
+:where(button,a,input,select,textarea,summary):focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.surface { background:var(--surface); border:1px solid var(--border); border-radius:10px; }
+code { font-family:ui-monospace,SFMono-Regular,monospace; }
+.app-layout { position:relative; min-height:100vh; display:grid; grid-template-columns:216px minmax(0,1fr); }
+.app-sidebar { background:#172435; color:#d1dae6; display:flex; flex-direction:column; padding:30px 18px 20px; }
+.app-brand { display:flex; align-items:center; gap:12px; font-size:15px; font-weight:600; color:#fff; line-height:1.35; }
+.brand-mark { display:grid; place-items:center; width:38px; height:38px; border-radius:9px; background:#227d76; color:#fff; font-size:13px; font-weight:600; letter-spacing:-.03em; flex-shrink:0; }
+.sidebar-navigation { margin-top:40px; }
+.sidebar-label { padding:0 12px; margin-bottom:14px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#99a9be; }
+.sidebar-link { display:flex; align-items:center; gap:12px; border-radius:7px; padding:11px 12px; margin-bottom:5px; font-size:13px; }
+a.sidebar-link:hover { background:#ffffff0a; color:#fff; }
+.sidebar-link.is-active { background:#ffffff12; color:#fff; font-weight:500; }
+.sidebar-link.is-active svg { color:#67c8b9; }
+.sidebar-future { margin-top:18px; color:#99a9be; }
+.sidebar-account { margin-top:auto; padding:24px 8px 0; }
+.account-avatar { background:#ffffff12; border-radius:50%; width:34px; height:34px; flex-shrink:0; display:grid; place-items:center; font-size:11px; }
+.sidebar-logout { display:flex; align-items:center; gap:8px; margin-top:18px; padding:9px 0; font-size:12px; color:#99a9be; }
+.sidebar-logout:hover { color:#fff; }
+.app-workspace { min-width:0; }
+.app-topbar { height:65px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 32px; border-bottom:1px solid var(--border); background:var(--surface); }
+.breadcrumb { display:flex; align-items:center; gap:10px; color:#68778a; font-size:12px; min-width:0; }
+.breadcrumb span { color:var(--foreground); }
+.workspace-label { font-size:11px; color:#68778a; border:1px solid var(--border); border-radius:5px; padding:3px 7px; }
+.mobile-menu { display:none!important; }
+.ui-page { max-width:1600px; margin:auto; padding:32px; }
+.ui-eyebrow { font-size:11px; text-transform:uppercase; letter-spacing:.13em; color:#68778a; }
+.ui-heading { font-size:32px; font-weight:600; letter-spacing:-.045em; line-height:1.2; overflow-wrap:anywhere; margin-top:8px; }
+.ui-subtitle { margin-top:10px; color:#68778a; font-size:13px; line-height:1.7; overflow-wrap:anywhere; }
+.ui-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:1px solid var(--border); background:var(--surface); border-radius:7px; padding:9px 13px; font-size:13px; font-weight:500; white-space:nowrap; transition:background 150ms,border-color 150ms; }
+.ui-button:hover { background:#f8fafc; border-color:#cbd5e1; }
+.ui-button-primary { background:var(--foreground); border-color:var(--foreground); color:#fff; }
+.ui-button-primary:hover { background:#263a50; border-color:#263a50; }
+.ui-button[aria-pressed="true"] { background:#e9f5f2; color:#11635e; border-color:#b4dcd4; }
+.ui-icon-button { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:5px; flex-shrink:0; color:#68778a; }
+.ui-button.ui-icon-button { padding:0; }
+.ui-button svg,.ui-icon-button svg { flex-shrink:0; }
+.ui-icon-button:hover { background:#f1f5f9; }
+.ui-danger { color:#b91c1c; }
+.ui-input { width:100%; min-width:0; border:1px solid #cbd5e1; background:#fff; padding:9px 12px; border-radius:7px; font-size:14px; }
+.ui-label { display:block; margin-bottom:6px; color:#475569; font-size:12px; font-weight:500; }
+.dashboard-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.dashboard-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin:28px 0 16px; font-size:12px; color:#68778a; }
+.dashboard-options { position:relative; }
+.dashboard-options summary { list-style:none; }
+.dashboard-options summary::-webkit-details-marker { display:none; }
+.dashboard-options[open] .dashboard-option-menu { display:grid; }
+.dashboard-option-menu { position:absolute; right:0; top:calc(100% + 8px); z-index:20; min-width:180px; border:1px solid var(--border); border-radius:8px; background:#fff; padding:6px; box-shadow:0 8px 24px #17243512; }
+.dashboard-option-menu button { text-align:left; display:flex; gap:8px; align-items:center; padding:10px; font-size:12px; border-radius:5px; }
+.dashboard-option-menu button:hover { background:#f8fafc; }
+.edit-properties { margin-top:24px; padding:18px; }
+.edit-properties summary { color:#475569; font-size:13px; font-weight:500; }
+.widget-create-panel { margin-top:18px; padding:20px; }
+.widget-create-form { display:grid; grid-template-columns:minmax(140px,1fr) minmax(180px,2fr) auto; gap:14px; align-items:end; margin-top:16px; }
+.widget-card { display:flex; flex-direction:column; height:100%; width:100%; background:#fff; border:1px solid var(--border); border-radius:10px; overflow:hidden; box-shadow:0 2px 4px #17243503; }
+.widget-card.is-editing { border-color:#b4cdc8; }
+.widget-header { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:16px 18px 10px; flex-shrink:0; }
+.widget-type { display:flex; align-items:center; gap:5px; margin-top:4px; font-size:11px; color:#68778a; }
+.widget-body { display:flex; flex:1; flex-direction:column; min-height:0; padding:0 18px 14px; overflow:auto; }
+.widget-demo { margin:0 0 5px; font-size:11px; color:#876129; }
+.widget-empty { display:flex; flex:1; min-height:85px; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:15px; color:#68778a; text-align:center; }
+.widget-footer { display:flex; justify-content:space-between; border-top:1px solid #eef2f6; padding:7px 18px; color:#68778a; font-size:11px; flex-shrink:0; }
+.widget-delete:hover { background:#fef2f2; color:#b91c1c; }
+.dashboard-grid .react-grid-item.react-grid-placeholder { background:#147d78; opacity:.12; border-radius:10px; }
+.dashboard-grid .react-grid-item.react-draggable-dragging { z-index:10; box-shadow:0 14px 28px #17243518; }
+.dashboard-grid .react-grid-item.resizing { z-index:10; }
+.dashboard-grid .react-resizable-handle { position:absolute; width:24px; height:24px; bottom:4px; right:4px; cursor:se-resize; }
+.dashboard-grid .react-resizable-handle::after { border-color:#8ba7a0; }
+.widget-drag-handle { cursor:grab!important; }
+.widget-drag-handle:active { cursor:grabbing!important; }
+.dashboard-grid .react-grid-item:not(.react-draggable-dragging):not(.resizing) { transition:transform 200ms ease; }
+@media(max-width:1023px) {
+  .app-layout { grid-template-columns:1fr; }
+  .app-sidebar { display:none; }
+  .app-sidebar.is-open { position:absolute; top:65px; left:0; right:0; z-index:30; display:flex; padding:20px; }
+  .app-brand { display:none; }
+  .sidebar-navigation { margin-top:0; }
+  .sidebar-account { margin-top:16px; padding-top:16px; border-top:1px solid #ffffff20; }
+  .mobile-menu { display:inline-flex!important; }
+  .app-topbar { padding:0 20px; }
+  .ui-page { padding:24px 20px; }
 }
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@media(max-width:639px) {
+  .ui-page { padding:24px 16px; }
+  .ui-heading { font-size:27px; }
+  .breadcrumb { gap:5px; font-size:11px; }
+  .breadcrumb a { display:none; }
+  .breadcrumb > svg { display:none; }
+  .widget-create-form { grid-template-columns:1fr; }
+  .ui-input { font-size:16px; }
+  .widget-header { padding:12px 12px 8px; }
+  .widget-body { padding:0 12px 10px; }
+  .widget-demo { overflow-wrap:anywhere; }
+  .dashboard-actions { width:100%; }
+  .dashboard-toolbar { margin-top:22px; }
 }
-
-body { background: var(--background); color: var(--foreground); font-family: Arial, Helvetica, sans-serif; }
-button, a { -webkit-tap-highlight-color: transparent; }
-.surface { background: var(--surface); border: 1px solid #e4e9ee; border-radius: 18px; }
-code { font-family: ui-monospace, SFMono-Regular, monospace; }
-
-/* ── react-grid-layout ─────────────────────────────────────────────────────── */
-
-/* Placeholder que aparece durante el arrastre */
-.dashboard-grid .react-grid-item.react-grid-placeholder {
-  background: #0d9488;
-  opacity: 0.15;
-  border-radius: 18px;
-  transition-duration: 100ms;
-  z-index: 2;
-}
-
-/* Ítem que se está arrastrando */
-.dashboard-grid .react-grid-item.react-draggable-dragging {
-  opacity: 0.9;
-  z-index: 10;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.18);
-  transition: box-shadow 150ms ease;
-}
-
-/* Ítem que se está redimensionando */
-.dashboard-grid .react-grid-item.resizing {
-  opacity: 0.9;
-  z-index: 10;
-}
-
-/* Handle de redimensionado */
-.dashboard-grid .react-resizable-handle {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  bottom: 6px;
-  right: 6px;
-  cursor: se-resize;
-  opacity: 0;
-  transition: opacity 150ms ease;
-}
-
-.dashboard-grid .react-grid-item:hover .react-resizable-handle {
-  opacity: 1;
-}
-
-.dashboard-grid .react-resizable-handle::after {
-  content: "";
-  position: absolute;
-  right: 3px;
-  bottom: 3px;
-  width: 7px;
-  height: 7px;
-  border-right: 2px solid #94a3b8;
-  border-bottom: 2px solid #94a3b8;
-  border-radius: 1px;
-}
-
-/* Cursor en el handle de arrastre */
-.widget-drag-handle {
-  cursor: grab;
-}
-.widget-drag-handle:active {
-  cursor: grabbing;
-}
-
-/* Transición suave para widgets que no se están arrastrando */
-.dashboard-grid .react-grid-item:not(.react-draggable-dragging):not(.resizing) {
-  transition: transform 200ms ease, opacity 200ms ease;
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
+.dashboard-grid.is-reading .react-resizable-handle { display:none!important; }
+@media(max-width:639px) {
+  .dashboard-grid.is-reading { height:auto!important; }
+  .dashboard-grid.is-reading .react-grid-item { position:relative!important; transform:none!important; width:100%!important; height:300px!important; margin-bottom:14px; }
 }

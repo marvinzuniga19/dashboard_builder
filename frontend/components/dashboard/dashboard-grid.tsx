@@ -14,7 +14,7 @@
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import ReactGridLayout, {
   type Layout as RGLLayout,
   useContainerWidth,
@@ -32,6 +32,7 @@ type DashboardGridProps = {
   onRemoveWidget: (id: number, title: string) => void;
   onLayoutChange: (items: WidgetLayoutItem[]) => void;
   isSubmitting?: boolean;
+  isEditing?: boolean;
 };
 
 /** Convierte el array de widgets de la API al formato de LayoutItem de RGL. */
@@ -79,37 +80,35 @@ export function DashboardGrid({
   onRemoveWidget,
   onLayoutChange,
   isSubmitting = false,
+  isEditing = false,
 }: DashboardGridProps) {
   const { width, containerRef, mounted } = useContainerWidth({ initialWidth: 1200 });
 
   // Layout local que se actualiza durante drag/resize pero solo persiste al soltar.
   const [localLayout, setLocalLayout] = useState<RGLLayout>(() => widgetsToLayout(widgets));
 
-  // Sincroniza el layout local cuando llegan widgets nuevos del servidor (alta/baja de widget).
-  const prevWidgetIdsRef = useRef<string>("");
-  useEffect(() => {
-    const ids = widgets
-      .map((w) => w.id)
-      .sort()
-      .join(",");
-    if (ids !== prevWidgetIdsRef.current) {
-      prevWidgetIdsRef.current = ids;
-      setLocalLayout(widgetsToLayout(widgets));
-    }
-  }, [widgets]);
+  // Reinicia antes de renderizar RGL cuando cambia el conjunto de widgets.
+  // Evita que el layout anterior y los nuevos hijos compitan durante un alta/baja.
+  const ids = widgets.map((widget) => widget.id).sort((a, b) => a - b).join(",");
+  const [widgetIds, setWidgetIds] = useState(ids);
+  if (ids !== widgetIds) {
+    setWidgetIds(ids);
+    setLocalLayout(widgetsToLayout(widgets));
+  }
 
   /** Durante drag/resize solo actualizamos estado local (sin HTTP). */
   const handleLayoutChange = useCallback((newLayout: RGLLayout) => {
-    setLocalLayout(newLayout);
+    setLocalLayout((current) => layoutsEqual(current, newLayout) ? current : newLayout);
   }, []);
 
   /** Persiste el layout final que entrega RGL, sin efectos dentro de un updater de React. */
   const handleInteractionStop = useCallback((newLayout: RGLLayout) => {
-    setLocalLayout(newLayout);
+    if (!isEditing) return;
+    setLocalLayout((current) => layoutsEqual(current, newLayout) ? current : newLayout);
     if (!layoutsEqual(newLayout, widgetsToLayout(widgets))) {
       onLayoutChange(layoutToItems(newLayout));
     }
-  }, [widgets, onLayoutChange]);
+  }, [widgets, onLayoutChange, isEditing]);
 
   if (widgets.length === 0) {
     return null; // El padre muestra el estado vacío.
@@ -124,21 +123,22 @@ export function DashboardGrid({
           layout={localLayout}
           width={width}
           gridConfig={{ cols: GRID_COLS, rowHeight: ROW_HEIGHT, margin: [12, 12] }}
-          dragConfig={{ enabled: !isSubmitting, handle: ".widget-drag-handle" }}
-          resizeConfig={{ enabled: !isSubmitting, handles: ["se", "s", "e"] }}
+          dragConfig={{ enabled: isEditing && !isSubmitting, handle: ".widget-drag-handle" }}
+          resizeConfig={{ enabled: isEditing && !isSubmitting, handles: ["se", "s", "e"] }}
           compactor={verticalCompactor}
           autoSize
           onLayoutChange={handleLayoutChange}
           onDragStop={handleInteractionStop}
           onResizeStop={handleInteractionStop}
-          className="dashboard-grid"
+          className={`dashboard-grid ${isEditing ? "is-editing" : "is-reading"}`}
         >
           {widgets.map((widget) => (
-            <div key={String(widget.id)} className="overflow-hidden rounded-[18px]">
+            <div key={String(widget.id)} className="overflow-hidden rounded-[10px]">
               <WidgetCard
                 widget={widget}
                 onRemove={onRemoveWidget}
                 isRemoving={isSubmitting}
+                isEditing={isEditing}
               />
             </div>
           ))}

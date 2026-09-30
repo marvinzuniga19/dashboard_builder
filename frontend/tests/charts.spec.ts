@@ -62,6 +62,9 @@ test("renderiza los tres gráficos, adapta el canvas y conserva el layout devuel
   const chart = card.getByRole("img");
   const before = await chart.boundingBox();
   expect(before).not.toBeNull();
+  await expect(card.getByRole("button", { name: "Arrastrar para mover widget" })).toHaveCount(0);
+  await expect(card.locator(".react-resizable-handle-se")).toBeHidden();
+  await page.getByRole("button", { name: "Editar", exact: true }).click();
   const handle = card.locator(".react-resizable-handle-se");
   await handle.scrollIntoViewIfNeeded();
   const bounds = await handle.boundingBox();
@@ -79,6 +82,8 @@ test("renderiza los tres gráficos, adapta el canvas y conserva el layout devuel
   }).toBeLessThan(2);
   // El handle de arrastre sigue funcionando sobre los gráficos, sin guardar durante el movimiento.
   const dragHandle = card.getByRole("button", { name: "Arrastrar para mover widget" });
+  await expect(dragHandle).toBeEnabled();
+  await dragHandle.scrollIntoViewIfNeeded();
   const dragBounds = await dragHandle.boundingBox();
   if (!dragBounds) throw new Error("No se encontró el control de arrastre");
   await page.mouse.move(dragBounds.x + 8, dragBounds.y + 8);
@@ -90,6 +95,9 @@ test("renderiza los tres gráficos, adapta el canvas y conserva el layout devuel
   const savedLayout = { ...widgets[0].layout };
   await page.reload();
   await expect(page.locator("canvas")).toHaveCount(3);
+  await expect(page.getByText("Vista de lectura", { exact: true })).toBeVisible();
+  await expect(card.getByRole("button", { name: "Eliminar widget Ejemplo 1", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Editar", exact: true }).click();
   await expect(card.getByText(`${savedLayout.w}×${savedLayout.h}`)).toBeVisible();
 
   await page.setViewportSize({ width: 780, height: 900 });

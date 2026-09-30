@@ -169,7 +169,17 @@ El cuerpo acepta `type`, `title` (opcional), `configuration` y `layout`:
 - Se contemplan carga, datos vacíos, valores incompatibles y fallos de renderizado. El texto accesible incluye los valores del gráfico.
 - No se requieren migraciones ni endpoints nuevos.
 
-Para probar: abre un dashboard, añade un widget de barras, uno de líneas y uno circular; comprueba sus etiquetas de demostración, leyendas y tooltips. Redimensiona y arrastra los widgets, y recarga para comprobar el layout.
+Para probar: abre un dashboard, añade un widget de barras, uno de líneas y uno circular; comprueba sus etiquetas de demostración, leyendas y tooltips. Pulsa **Editar**, redimensiona y arrastra los widgets, y recarga para comprobar el layout.
+
+## Interfaz y edición
+
+- Barra lateral oscura, navegación por ruta, iconos Lucide y controles visuales consistentes.
+- El dashboard abre en **Vista de lectura**. Pulsa **Editar** para mover, redimensionar o eliminar widgets; el layout se guarda al soltar. **Terminar edición** vuelve a la vista de lectura.
+- **Añadir widget** abre el formulario y activa la edición. **Propiedades del dashboard** permite cambiar el nombre. El menú de opciones conserva la eliminación del dashboard con confirmación.
+- En móviles la navegación se despliega desde el botón de menú. Por debajo de 640 px, la lectura apila las tarjetas a ancho completo sin modificar el layout guardado; la edición mantiene el lienzo de 12 columnas.
+- Login, listado y estado del sistema comparten el estilo. Las fuentes de datos siguen pendientes y los gráficos conservan la etiqueta de demostración.
+
+Validación del rediseño: [VALIDACION-UI.md](validaciones/VALIDACION-UI.md).
 
 ## Configuración
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowLeft, Check, Eye, MoreHorizontal, Pencil, Plus, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
@@ -32,6 +33,8 @@ function DashboardDetail() {
     esValido ? dashboardId : null,
   );
   const actions = useDashboardActions();
+  const [isEditing, setIsEditing] = useState(false);
+  const [showWidgetForm, setShowWidgetForm] = useState(false);
   const [name, setName] = useState<string | null>(null);
   const widgets = useWidgets(dashboard ? dashboard.id : null);
   const widgetActions = useWidgetActions(dashboard ? dashboard.id : null);
@@ -64,6 +67,7 @@ function DashboardDetail() {
     });
     if (creado) {
       setTituloWidget("");
+      setShowWidgetForm(false);
     }
   }
 
@@ -123,40 +127,43 @@ function DashboardDetail() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl space-y-7 px-6 py-10 lg:px-10 lg:py-12">
+    <main className="ui-page">
       <Link
         href="/dashboards"
-        className="inline-block text-sm font-semibold text-slate-500 transition hover:text-teal-800"
+        className="mb-6 inline-flex items-center gap-2 text-xs text-slate-500 hover:text-teal-800"
       >
-        ← Volver a dashboards
+        <ArrowLeft size={14} aria-hidden="true" /> Volver a dashboards
       </Link>
 
-      {/* Cabecera del dashboard */}
-      <section className="flex flex-wrap items-end justify-between gap-4">
+      <section className="flex flex-wrap items-center justify-between gap-5">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-700">
-            Dashboard
-          </p>
-          <h1 className="mt-3 truncate text-3xl font-bold tracking-tight sm:text-4xl">
-            {dashboard.name}
-          </h1>
-          <p className="mt-3 text-sm leading-6 text-slate-500">
-            {dashboard.description || <span className="text-slate-400">Sin descripción</span>}
-          </p>
+          <p className="ui-eyebrow">Mi dashboard</p>
+          <h1 className="ui-heading">{dashboard.name}</h1>
+          <p className="ui-subtitle">{dashboard.description || "Organiza tus indicadores y gráficos en un solo lugar."}</p>
         </div>
-        <button
-          type="button"
-          onClick={handleRemove}
-          disabled={actions.isSubmitting}
-          className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-red-200 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Eliminar
-        </button>
+        <div className="dashboard-actions">
+          <button type="button" className="ui-button" aria-pressed={isEditing} disabled={widgetActions.isSubmitting}
+            onClick={() => { setIsEditing((value) => !value); setShowWidgetForm(false); setName(null); }}>
+            {isEditing ? <Check size={15} aria-hidden="true" /> : <Pencil size={15} aria-hidden="true" />}
+            {isEditing ? "Terminar edición" : "Editar"}
+          </button>
+          <button type="button" className="ui-button ui-button-primary" aria-expanded={showWidgetForm} aria-controls="widget-create-panel"
+            onClick={() => { setIsEditing(true); setShowWidgetForm((value) => !value); }}>
+            <Plus size={16} aria-hidden="true" /> Añadir widget
+          </button>
+          <details className="dashboard-options">
+            <summary className="ui-button" aria-label="Opciones del dashboard"><MoreHorizontal size={17} aria-hidden="true" /></summary>
+            <div className="dashboard-option-menu"><button type="button" className="ui-danger" onClick={handleRemove} disabled={actions.isSubmitting}>
+              <Trash2 size={14} aria-hidden="true" /> Eliminar dashboard
+            </button></div>
+          </details>
+        </div>
       </section>
 
       {/* Renombrar */}
-      <section className="surface p-6">
-        <h2 className="text-sm font-semibold text-slate-700">Renombrar</h2>
+      {isEditing ? (
+      <details className="surface edit-properties">
+        <summary>Propiedades del dashboard</summary>
         <form onSubmit={handleSave} className="mt-3 flex flex-wrap gap-3" noValidate>
           <label htmlFor="dashboard-rename" className="sr-only">
             Nuevo nombre
@@ -168,12 +175,12 @@ function DashboardDetail() {
             maxLength={120}
             value={name ?? dashboard.name}
             onChange={(event) => setName(event.target.value)}
-            className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-teal-700 focus:ring-4 focus:ring-teal-100"
+            className="ui-input flex-1"
           />
           <button
             type="submit"
             disabled={actions.isSubmitting || name === null || name.trim() === ""}
-            className="rounded-xl bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-900 disabled:cursor-not-allowed disabled:opacity-50"
+            className="ui-button ui-button-primary"
           >
             {actions.isSubmitting ? "Guardando…" : "Guardar"}
           </button>
@@ -181,7 +188,7 @@ function DashboardDetail() {
             <button
               type="button"
               onClick={() => setName(null)}
-              className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              className="ui-button"
             >
               Cancelar
             </button>
@@ -192,20 +199,18 @@ function DashboardDetail() {
             {actions.error}
           </p>
         ) : null}
-      </section>
+      </details>
+      ) : null}
+      {actions.error && !isEditing ? <p role="alert" className="mt-4 text-sm text-red-700">{actions.error}</p> : null}
 
-      {/* Añadir widget */}
-      <section aria-label="Añadir widget">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold text-slate-700">
-            Widgets{" "}
-            {widgets.widgets.length > 0 ? `(${widgets.widgets.length})` : null}
-          </h2>
+      {showWidgetForm ? (
+      <section id="widget-create-panel" className="surface widget-create-panel" aria-label="Crear widget">
+        <div className="flex items-center justify-between gap-3"><h2 className="text-sm font-semibold">Nuevo widget</h2>
+          <button type="button" className="ui-icon-button" aria-label="Cerrar formulario de widget" onClick={() => setShowWidgetForm(false)}><X size={16} aria-hidden="true" /></button>
         </div>
-
         <form
           onSubmit={handleCreateWidget}
-          className="surface mt-3 flex flex-wrap items-end gap-3 p-4"
+          className="widget-create-form"
           noValidate
         >
           <div className="flex flex-col gap-2">
@@ -217,7 +222,7 @@ function DashboardDetail() {
               name="type"
               value={tipoWidget}
               onChange={(event) => setTipoWidget(event.target.value as WidgetType)}
-              className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-teal-700 focus:ring-4 focus:ring-teal-100"
+              className="ui-input"
             >
               {WIDGET_TYPES.map((tipo) => (
                 <option key={tipo} value={tipo}>
@@ -239,29 +244,37 @@ function DashboardDetail() {
               onChange={(event) => setTituloWidget(event.target.value)}
               placeholder="Si se deja vacío se usa el nombre del tipo"
               aria-describedby={widgetActions.error ? "widget-create-error" : undefined}
-              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-700 focus:ring-4 focus:ring-teal-100"
+              className="ui-input"
             />
           </div>
 
           <button
             type="submit"
             disabled={widgetActions.isSubmitting}
-            className="rounded-xl bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-900 disabled:cursor-not-allowed disabled:opacity-50"
+            className="ui-button ui-button-primary"
           >
-            {widgetActions.isSubmitting ? "Añadiendo…" : "Añadir widget"}
+            {widgetActions.isSubmitting ? "Añadiendo…" : "Crear widget"}
           </button>
 
           {widgetActions.error ? (
             <p
               id="widget-create-error"
               role="alert"
-              className="w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+              className="col-span-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
             >
               {widgetActions.error}
             </p>
           ) : null}
         </form>
       </section>
+      ) : null}
+      {widgetActions.error && !showWidgetForm ? <p role="alert" className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{widgetActions.error}</p> : null}
+      <div className="dashboard-toolbar">
+        <span>{widgets.widgets.length} {widgets.widgets.length === 1 ? "widget" : "widgets"}</span>
+        <span className="inline-flex items-center gap-2" role="status">{isEditing ? <Pencil size={13} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+          {widgetActions.isSubmitting ? "Guardando…" : isEditing ? "Modo de edición · Los cambios se guardan al soltar" : "Vista de lectura"}
+        </span>
+      </div>
 
       {/* Lienzo del grid */}
       <section aria-label="Lienzo del dashboard">
@@ -282,8 +295,7 @@ function DashboardDetail() {
           <section className="surface p-7">
             <h3 className="text-lg font-bold">Este dashboard está vacío</h3>
             <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-              Añade un widget con el formulario de arriba. Arrástralo o redimensiónalo
-              para colocarlo donde quieras; la posición se guarda automáticamente al soltar.
+              Empieza con «Añadir widget». Usa el modo de edición para mover y redimensionar tus gráficos.
             </p>
           </section>
         ) : null}
@@ -294,6 +306,7 @@ function DashboardDetail() {
             onRemoveWidget={handleRemoveWidget}
             onLayoutChange={handleLayoutChange}
             isSubmitting={widgetActions.isSubmitting}
+            isEditing={isEditing}
           />
         ) : null}
       </section>
