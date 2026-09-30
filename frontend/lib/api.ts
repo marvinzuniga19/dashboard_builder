@@ -14,8 +14,10 @@ export class ApiError extends Error {
   }
 }
 
+// PUT no se incluye a propósito: el backend no lo declara en `allow_methods`, así
+// que un PUT cruzando orígenes fallaría en el preflight sin aviso.
 type RequestOptions = {
-  method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
   body?: unknown;
   signal?: AbortSignal;
 };
@@ -60,6 +62,15 @@ export function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
 
 export function apiPost<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
   return apiRequest<T>(path, { method: "POST", body, signal });
+}
+
+export function apiPatch<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
+  return apiRequest<T>(path, { method: "PATCH", body, signal });
+}
+
+/** DELETE devuelve 204 sin cuerpo: apiRequest ya resuelve ese caso a `undefined`. */
+export function apiDelete<T = void>(path: string, signal?: AbortSignal): Promise<T> {
+  return apiRequest<T>(path, { method: "DELETE", signal });
 }
 
 export function apiUrl(path: string): string {
